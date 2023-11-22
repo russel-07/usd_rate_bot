@@ -7,7 +7,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=100, null=True, blank=True)
     notification = models.BooleanField('Оповещение', default=False)
     reg_date = models.DateTimeField('Дата регистрации', auto_now_add=True)
-    
+
     USERNAME_FIELD = 'telegram_id'
     REQUIRED_FIELDS = ['username']
 

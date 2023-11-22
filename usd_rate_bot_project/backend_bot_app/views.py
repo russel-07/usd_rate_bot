@@ -13,10 +13,9 @@ class SignUp(views.APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        telegram_id = request.data.get('telegram_id')
-        username = request.data.get('username')
-        user, _ = User.objects.get_or_create(telegram_id=telegram_id,
-                                             username=username)
+        tg_id = request.data.get('telegram_id')
+        name = request.data.get('username')
+        user, _ = User.objects.get_or_create(telegram_id=tg_id, username=name)
         user.save()
         token = self.get_token_for_user(user)
         return Response({'token': token})
@@ -45,7 +44,7 @@ class UserNotification(views.APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class UserRequestViewSet(generics.ListAPIView):
     serializer_class = UserRequestSerializer
@@ -65,10 +64,10 @@ class UserCurrentUsdRate(views.APIView):
         if serializer.is_valid():
             if request.data:
                 serializer.save(user=user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.data, status.HTTP_201_CREATED)
             error = {"rate": ["Обязательное поле."]}
-            return Response(error, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(error, status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
 
 class TemplateTextViewSet(viewsets.ModelViewSet):
@@ -85,5 +84,5 @@ class CurrentUsdRate(views.APIView):
     def get(self, request):
         url = 'https://www.cbr-xml-daily.ru/daily_json.js'
         response = requests.get(url)
-        rate = response.json()['Valute']['USD']['Value']
-        return Response({'usd_rate': rate})
+        usd_rate = response.json()['Valute']['USD']['Value']
+        return Response({'usd_rate': usd_rate})

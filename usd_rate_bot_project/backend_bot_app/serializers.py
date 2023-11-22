@@ -14,7 +14,7 @@ class UserRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserRequest
-        fields = ['user', 'rate', 'date']
+        fields = ['rate', 'date']
 
 
 class TemplateTextSerializer(serializers.ModelSerializer):
