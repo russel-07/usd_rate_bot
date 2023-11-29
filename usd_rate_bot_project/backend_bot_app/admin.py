@@ -5,7 +5,7 @@ from .models import User, UserRequest, TemplateText
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('telegram_id', 'username',
+    list_display = ('telegram_id', 'firstname', 'lastname', 'username',
                     'notification', 'reg_date')
     empty_value_display = '-пусто-'
 

@@ -4,7 +4,10 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     telegram_id = models.CharField(max_length=100, unique=True)
-    username = models.CharField(max_length=100, null=True, blank=True)
+    firstname = models.CharField(max_length=200, verbose_name='Имя')
+    lastname = models.CharField(max_length=200, verbose_name='Фамилия')
+    username = models.CharField(max_length=200, null=True, blank=True)
+    auth_token = models.CharField(max_length=500, null=True, blank=True)
     notification = models.BooleanField('Оповещение', default=False)
     reg_date = models.DateTimeField('Дата регистрации', auto_now_add=True)
 
@@ -25,6 +28,7 @@ class UserRequest(models.Model):
     rate = models.CharField(max_length=100, verbose_name='Курс доллара')
     date = models.DateTimeField('Дата запроса', auto_now_add=True)
     user = models.ForeignKey(User, models.CASCADE, related_name='requests')
+
 
     class Meta:
         verbose_name = 'Запрос пользователя'
