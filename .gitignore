@@ -155,7 +155,7 @@ cython_debug/
 # VSC
 .vscode
 
-.service
+*.service
 
 **/migrations/**
 !**/migrations
