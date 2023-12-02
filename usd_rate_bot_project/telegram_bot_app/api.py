@@ -1,8 +1,8 @@
-import requests
 import environ
+import requests
 
-from datetime import datetime as dt
 from pathlib import Path
+from datetime import datetime as dt
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,133 +10,140 @@ env = environ.Env()
 environ.Env.read_env(BASE_DIR / '.env')
 
 bot_token = env('TELEGRAM_BOT_TOKEN')
-superuser_token = 'Bearer ' + env('SUPERUSER_TOKEN')
+superuser_tg_id = env('SUPERUSER_TG_ID')
+superuser_password = env('SUPERUSER_PASSWORD')
+api_url = env('API_URL')
 
 
-def signup(chat_id, username, first_name, last_name):
-    try:
-        url = 'http://51.250.77.9/api/v1/auth/'
-        data = {'telegram_id': chat_id, 'username': username,
-                'firstname': first_name, 'lastname': last_name}
-        requests.post(url, data=data)
-        text = get_template_text('greeting')
-        msg = f'{first_name} {last_name}{text}'
+def signup(chat_id, firstname, lastname, username):
+    url = api_url + 'user/'
+    token = get_superuser_token()
+    data = {'telegram_id': chat_id, 'firstname': firstname,
+            'lastname': lastname, 'username': username}
+    response = requests.post(url, headers=token, data=data)
+    if response.status_code == 201:
+        text = get_template_text('greeting', token)
+        msg = text.format(**data)
+    else:
+        msg = 'Вы уже зарегистрированы.'
+    return msg
+
+
+def get_user_data(chat_id):
+    url = api_url + f'user/{chat_id}'
+    token = get_superuser_token()
+    response = requests.get(url, headers=token)
+    if response.status_code == 200:
+        data = response.json()
+        dt_frmt = '%Y-%m-%dT%H:%M:%S.%f+03:00'
+        data['notification'] = 'включены' if data['notification'] \
+            else 'выключены'
+        data['reg_date'] = dt.strptime(data['reg_date'], dt_frmt) \
+            .strftime('%d.%m.%Y')
+        text = get_template_text('user_data', token)
+        msg = text.format(**data)
         return msg
-    except Exception:
-        return 'Что-то пошло не так, попробуйте еще раз.'
 
 
-def get_user_token(chat_id):
-    url = f'http://51.250.77.9/api/v1/user/{chat_id}/'
-    header = {'Authorization': superuser_token}
-    response = requests.get(url, headers=header)
-    user_data = response.json()
-    return user_data
+def change_user_notification_status(chat_id):
+    url = api_url + f'user/{chat_id}/'
+    token = get_superuser_token()
+    response = requests.get(url, headers=token)
+    if response.status_code == 200:
+        user_notification_status = not response.json()['notification']
+        data = {'notification': user_notification_status}
+        response = requests.patch(url, headers=token, data=data)
+        if response.status_code == 200:
+            if user_notification_status:
+                msg = 'Вы успешно подписались на периодическое' \
+                      ' оповещение о курсе доллара.'
+            else:
+                msg = 'Вы успешно отписались от периодического' \
+                      ' оповещения о курсе доллара.'
+            return msg
 
 
-def get_template_text(temp_name):
-    url = f'http://51.250.77.9/api/v1/template_text/{temp_name}/'
-    header = {'Authorization': superuser_token}
-    response = requests.get(url, headers=header)
-    template_text = response.json()['text']
-    return template_text
+def get_user_requests(chat_id):
+    url = api_url + f'user/{chat_id}/requests/'
+    token = get_superuser_token()
+    response = requests.get(url, headers=token)
+    if response.status_code == 200:
+        data = response.json()
+        if data:
+            text = [get_template_text('user_requests', token), '']
+            strptime_ = '%Y-%m-%dT%H:%M:%S.%f+03:00'
+            strftime_ = '%d.%m.%Y %H:%M'
+            for request in data:
+                date = dt.strptime(request['date'], strptime_) \
+                       .strftime(strftime_)
+                rate = f"{request['rate']} {chr(8381)}"
+                text.append(f'{date}: {rate}')
+            msg = '\n'.join(text)
+        else:
+            msg = 'У вас пока нет запросов.'
+        return msg
+
+
+def get_usd_rate(chat_id):
+    url = api_url + f'user/{chat_id}/requests/'
+    token = get_superuser_token()
+    data = {'rate': current_usd_rate}
+    response = requests.post(url, headers=token, data=data)
+    if response.status_code == 201:
+        text = get_template_text('rate', token)
+        msg = text.format(rate=current_usd_rate, rub_sign=chr(8381))
+        url = api_url + f'user/{chat_id}/'
+        response = requests.get(url, headers=token)
+        if response.status_code == 200:
+            notification_status = response.json()['notification']
+            return msg, notification_status
+
+
+def get_superuser_token():
+    url = api_url + 'token/'
+    data = {'telegram_id': superuser_tg_id, 'password': superuser_password}
+    response = requests.post(url, data=data)
+    if response.status_code == 200:
+        token = {'Authorization': f"Bearer {response.json()['access']}"}
+        return token
 
 
 def update_usd_rate():
-    try:
-        url = 'http://51.250.77.9/api/v1/current_usd_rate/'
-        header = {'Authorization': superuser_token}
-        response = requests.get(url, headers=header)
-        global current_usd_rate
+    global current_usd_rate
+    url = api_url + 'rate/'
+    token = get_superuser_token()
+    response = requests.get(url, headers=token)
+    if response.status_code == 200:
         current_usd_rate = response.json()['usd_rate']
         return current_usd_rate
-    except Exception:
-        return
+
+
+def get_notified_list():
+    url = api_url + 'notified_list/'
+    token = get_superuser_token()
+    response = requests.get(url, headers=token)
+    if response.status_code == 200:
+        notified_list = response.json()['notified_list']
+        text = get_template_text('rate', token)
+        msg = text.format(rate=current_usd_rate, rub_sign=chr(8381))
+        return notified_list, msg
+
+
+def get_template_text(temp_name, token):
+    url = api_url + f'template_text/{temp_name}/'
+    response = requests.get(url, headers=token)
+    if response.status_code == 200:
+        template_text = response.json()['text']
+        return template_text
+
 
 current_usd_rate = update_usd_rate()
 
 
-def get_usd_rate(chat_id):
-    try:
-        user_token = 'Bearer ' + get_user_token(chat_id)['auth_token']
-        header = {'Authorization': user_token}
-        data = {'rate': current_usd_rate}
-        url = 'http://51.250.77.9/api/v1/user_current_usd_rate/'
-        requests.get(url, headers=header, data=data)
-        text = get_template_text('current_rate')
-        msg = f'{text}\n{current_usd_rate} {chr(8381)}'
-        return msg
-    except Exception:
-        return 'Что-то пошло не так, попробуйте еще раз.'
-
-
-def get_user_data(chat_id):
-    try:
-        user_token = 'Bearer ' + get_user_token(chat_id)['auth_token']
-        header = {'Authorization': user_token}
-        url = 'http://51.250.77.9/api/v1/me/'
-        response = requests.get(url, headers=header)
-        firstname = response.json()['firstname']
-        lastname = response.json()['lastname']
-        username = response.json()['username'] if response.json()['username'] else '-'
-        chat_id = response.json()['telegram_id']
-        notif = 'включены' if response.json()['notification'] else 'выключены'
-        reg_date = dt.strptime(response.json()['reg_date'],
-                            '%Y-%m-%dT%H:%M:%S.%f+03:00').strftime('%d.%m.%Y')
-        msg = ('Данные о вашем аккаунте:\n'
-            f'Имя: {firstname}\n'
-            f'Фамилия: {lastname}\n'
-            f'Username: {username}\n'
-            f'Chat id: {chat_id}\n'
-            f'Оповещения: {notif}\n'
-            f'Дата регистрации: {reg_date}'
-            )
-        return msg
-    except Exception:
-        return 'Что-то пошло не так, попробуйте еще раз.'
-
-
-def get_user_requests(chat_id):
-    try:
-        user_token = 'Bearer ' + get_user_token(chat_id)['auth_token']
-        text = get_template_text('user_log')
-        header = {'Authorization': user_token}
-        url = 'http://51.250.77.9/api/v1/requests/'
-        response = requests.get(url, headers=header)
-        strptime = '%Y-%m-%dT%H:%M:%S.%f+03:00'
-        date = lambda date: dt.strptime(date, strptime).strftime('%d.%m.%Y %H:%M')
-        str_ = lambda str_: f"{date(str_['date'])}: {str_['rate']} {chr(8381)}"
-        log = '\n'.join([str_(request) for request in response.json()])
-        msg = f'{text}\n{log}'
-        return msg
-    except Exception:
-        return 'Что-то пошло не так, попробуйте еще раз.'
-
-
-def notification_subscription(chat_id):
-    try:
-        user_token = 'Bearer ' + get_user_token(chat_id)['auth_token']
-        header = {'Authorization': user_token}
-        url = 'http://51.250.77.9/api/v1/notification/'
-        response = requests.patch(url, headers=header)
-        if response.json()['notification']:
-            msg = f'Вы успешно подписались на периодическое оповещение о курсе доллара.'
-        else:
-            msg = f'Вы успешно отписались от периодического оповещения о курсе доллара.'
-        return msg
-    except Exception:
-        return 'Что-то пошло не так, попробуйте еще раз.'
-
-
-def get_notification_list():
-    notification_list = []
-    try:
-        url = 'http://51.250.77.9/api/v1/notification_list/'
-        header = {'Authorization': superuser_token}
-        response = requests.get(url, headers=header)
-        notification_list = response.json()['notification_list']
-        text = get_template_text('current_rate')
-        msg = f'{text}\n{current_usd_rate} {chr(8381)}'
-        return notification_list, msg
-    except Exception:
-        return notification_list, 'Что-то пошло не так, попробуйте еще раз.'
+# print(signup(123, 'vasya', 'angel', 'van'))
+# print(get_user_data(123))
+# print(change_user_notification_status(123))
+# print(get_user_requests(123))
+# print(get_usd_rate(123))
+# print(get_notified_list())
+# print(update_usd_rate())

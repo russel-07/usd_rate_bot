@@ -155,6 +155,8 @@ cython_debug/
 # VSC
 .vscode
 
+.service
+
 **/migrations/**
 !**/migrations
 !**/migrations/__init__.py

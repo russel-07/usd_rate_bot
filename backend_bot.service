@@ -1,0 +1,13 @@
+[Unit]
+Description=backend_bot daemon
+After=network.target
+
+[Service]
+User=russel_07
+WorkingDirectory=/home/russel_07/usd_rate_bot/usd_rate_bot_project
+ExecStart=/home/russel_07/usd_rate_bot/venv/bin/gunicorn --bind 0.0.0.0:8000 usd_rate_bot_project.wsgi
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target

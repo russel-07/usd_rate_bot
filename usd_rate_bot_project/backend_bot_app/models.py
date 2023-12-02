@@ -7,16 +7,14 @@ class User(AbstractUser):
     firstname = models.CharField(max_length=200, verbose_name='Имя')
     lastname = models.CharField(max_length=200, verbose_name='Фамилия')
     username = models.CharField(max_length=200, null=True, blank=True)
-    auth_token = models.CharField(max_length=500, null=True, blank=True)
     notification = models.BooleanField('Оповещение', default=False)
     reg_date = models.DateTimeField('Дата регистрации', auto_now_add=True)
 
     USERNAME_FIELD = 'telegram_id'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['firstname', 'lastname', 'username']
 
     def __str__(self):
-        user = self.username if self.username else self.telegram_id
-        return user
+        return self.telegram_id
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -25,10 +23,9 @@ class User(AbstractUser):
 
 
 class UserRequest(models.Model):
-    rate = models.CharField(max_length=100, verbose_name='Курс доллара')
-    date = models.DateTimeField('Дата запроса', auto_now_add=True)
     user = models.ForeignKey(User, models.CASCADE, related_name='requests')
-
+    date = models.DateTimeField('Дата запроса', auto_now_add=True)
+    rate = models.CharField(max_length=100, verbose_name='Курс доллара')
 
     class Meta:
         verbose_name = 'Запрос пользователя'
@@ -38,7 +35,7 @@ class UserRequest(models.Model):
 
 class TemplateText(models.Model):
     slug = models.SlugField(unique=True)
-    description = models.CharField(max_length=100, verbose_name='Описание')
+    description = models.CharField(max_length=200, verbose_name='Описание')
     text = models.TextField('Текст')
 
     class Meta:
