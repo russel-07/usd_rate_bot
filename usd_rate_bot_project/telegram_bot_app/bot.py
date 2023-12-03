@@ -26,7 +26,7 @@ async def start(message: types.Message):
     markup.add(types.KeyboardButton('Подписаться/отписаться на оповещение'))
     markup.add(types.KeyboardButton('Получить данные обо мне'))
 
-    await message.answer(msg, reply_markup=markup)
+    await message.answer(msg, parse_mode='HTML', reply_markup=markup)
 
 
 @dp.message_handler(content_types=['text'])
@@ -36,22 +36,32 @@ async def get_text_messages(message):
         markup = types.InlineKeyboardMarkup(resize_keyboard=True)
         if not notification_status:
             markup.add(types.InlineKeyboardButton('Подписаться на оповещение',
-                                                  callback_data='Подписаться/отписаться на оповещение'))
+                                                  callback_data='subscription'))        
         markup.add(types.InlineKeyboardButton('Показать историю запросов',
-                                              callback_data='Показать историю запросов'))
-        await message.answer(msg, markup=markup)
+                                              callback_data='requests'))
+        await message.answer(msg, parse_mode='HTML', reply_markup=markup)
 
     elif message.text == 'Показать историю запросов':
         msg = get_user_requests(message.chat.id)
-        await message.answer(msg)
+        await message.answer(msg, parse_mode='HTML')
 
     elif message.text == 'Подписаться/отписаться на оповещение':
         msg = change_user_notification_status(message.chat.id)
-        await message.answer(msg)
+        await message.answer(msg, parse_mode='HTML')
 
     elif message.text == 'Получить данные обо мне':
         msg = get_user_data(message.chat.id)
-        await message.answer(msg)
+        await message.answer(msg, parse_mode='HTML')
+
+
+@dp.callback_query_handler()
+async def callback_answer(callback):
+    if callback.data == 'subscription':
+        msg = change_user_notification_status(callback.message.chat.id)
+        await callback.message.answer(msg, parse_mode='HTML')
+    elif callback.data == 'requests':
+        msg = get_user_requests(callback.message.chat.id)
+        await callback.message.answer(msg, parse_mode='HTML')
 
 
 async def notification():

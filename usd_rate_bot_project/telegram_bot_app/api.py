@@ -70,7 +70,7 @@ def get_user_requests(chat_id):
     if response.status_code == 200:
         data = response.json()
         if data:
-            text = [get_template_text('user_requests', token), '']
+            text = [get_template_text('user_requests', token)]
             strptime_ = '%Y-%m-%dT%H:%M:%S.%f+03:00'
             strftime_ = '%d.%m.%Y %H:%M'
             for request in data:
@@ -138,12 +138,3 @@ def get_template_text(temp_name, token):
 
 
 current_usd_rate = update_usd_rate()
-
-
-# print(signup(123, 'vasya', 'angel', 'van'))
-# print(get_user_data(123))
-# print(change_user_notification_status(123))
-# print(get_user_requests(123))
-# print(get_usd_rate(123))
-# print(get_notified_list())
-# print(update_usd_rate())
