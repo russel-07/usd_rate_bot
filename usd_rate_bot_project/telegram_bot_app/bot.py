@@ -19,8 +19,7 @@ async def start(message: types.Message):
     username = message.chat.username
     msg = signup(chat_id, firstname, lastname, username)
 
-    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True,
-                                       resize_keyboard=True)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(types.KeyboardButton('Узнать текущий курс доллара'))
     markup.add(types.KeyboardButton('Показать историю запросов'))
     markup.add(types.KeyboardButton('Подписаться/отписаться на оповещение'))
