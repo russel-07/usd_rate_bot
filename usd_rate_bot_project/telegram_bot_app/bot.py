@@ -67,7 +67,7 @@ async def callback_answer(callback):
 async def notification():
     notified_list, msg = get_notified_list()
     for chat_id in notified_list:
-        await bot.send_message(chat_id, msg)
+        await bot.send_message(chat_id, msg, parse_mode='HTML')
 
 
 scheduler.add_job(update_usd_rate, 'cron', day_of_week='mon-sat',
