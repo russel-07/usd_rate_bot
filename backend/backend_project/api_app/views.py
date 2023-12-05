@@ -24,11 +24,13 @@ class UserRequestViewSet(viewsets.ModelViewSet):
     http_method_names = ('get', 'post')
 
     def get_queryset(self):
-        user = get_object_or_404(User, telegram_id=self.kwargs.get('telegram_id'))
+        user = get_object_or_404(User, telegram_id=self
+                                 .kwargs.get('telegram_id'))
         return user.requests.all()
 
     def perform_create(self, serializer):
-        user = get_object_or_404(User, telegram_id=self.kwargs.get('telegram_id'))
+        user = get_object_or_404(User, telegram_id=self
+                                 .kwargs.get('telegram_id'))
         serializer.save(user=user)
 
 

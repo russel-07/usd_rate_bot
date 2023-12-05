@@ -1,18 +1,15 @@
-import environ
+import os
 import requests
 
-from pathlib import Path
 from datetime import datetime as dt
+from dotenv import load_dotenv
+load_dotenv()
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env()
-environ.Env.read_env(BASE_DIR / '.env')
-
-bot_token = env('TELEGRAM_BOT_TOKEN')
-superuser_tg_id = env('SUPERUSER_TG_ID')
-superuser_password = env('SUPERUSER_PASSWORD')
-api_url = env('API_URL')
+bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
+superuser_tg_id = os.getenv('SUPERUSER_TG_ID')
+superuser_password = os.getenv('SUPERUSER_PASSWORD')
+api_url = os.getenv('API_URL')
 
 
 def signup(chat_id, firstname, lastname, username):

@@ -1,5 +1,7 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from aiogram import Bot, Dispatcher, executor, types
+from aiogram import Bot, Dispatcher, executor
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from api import bot_token, signup, update_usd_rate, get_usd_rate
 from api import get_user_data, get_user_requests
@@ -12,18 +14,18 @@ scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
 
 
 @dp.message_handler(commands=['start'])
-async def start(message: types.Message):
+async def start(message: Message):
     chat_id = message.chat.id
     firstname = message.chat.first_name
     lastname = message.chat.last_name
     username = message.chat.username
     msg = signup(chat_id, firstname, lastname, username)
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(types.KeyboardButton('Узнать текущий курс доллара'))
-    markup.add(types.KeyboardButton('Показать историю запросов'))
-    markup.add(types.KeyboardButton('Подписаться/отписаться на оповещение'))
-    markup.add(types.KeyboardButton('Получить данные обо мне'))
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(KeyboardButton('Узнать текущий курс доллара'))
+    markup.add(KeyboardButton('Показать историю запросов'))
+    markup.add(KeyboardButton('Подписаться/отписаться на оповещение'))
+    markup.add(KeyboardButton('Получить данные обо мне'))
 
     await message.answer(msg, parse_mode='HTML', reply_markup=markup)
 
@@ -32,12 +34,12 @@ async def start(message: types.Message):
 async def get_text_messages(message):
     if message.text == 'Узнать текущий курс доллара':
         msg, notification_status = get_usd_rate(message.chat.id)
-        markup = types.InlineKeyboardMarkup(resize_keyboard=True)
+        markup = InlineKeyboardMarkup(resize_keyboard=True)
         if not notification_status:
-            markup.add(types.InlineKeyboardButton('Подписаться на оповещение',
-                                                  callback_data='subscription'))        
-        markup.add(types.InlineKeyboardButton('Показать историю запросов',
-                                              callback_data='requests'))
+            markup.add(InlineKeyboardButton('Подписаться на оповещение',
+                                            callback_data='subscription'))
+        markup.add(InlineKeyboardButton('Показать историю запросов',
+                                        callback_data='requests'))
         await message.answer(msg, parse_mode='HTML', reply_markup=markup)
 
     elif message.text == 'Показать историю запросов':

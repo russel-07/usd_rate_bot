@@ -1,3 +1,5 @@
+![workflow](https://github.com/russel-07/usd_rate_bot/actions/workflows/usd_rate_bot_workflow.yml/badge.svg)
+
 # [USD RATE BOT](https://t.me/usd_rate_russel_bot/)
  
 [![Python](https://img.shields.io/badge/-Python-464646?style=flat-square&logo=Python)](https://www.python.org/)

@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'backend_bot_app',
+    'api_app',
     'rest_framework',
     'corsheaders',
 ]
@@ -47,7 +47,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'usd_rate_bot_project.urls'
+ROOT_URLCONF = 'backend_project.urls'
 
 TEMPLATES = [
     {
@@ -65,7 +65,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'usd_rate_bot_project.wsgi.application'
+WSGI_APPLICATION = 'backend_project.wsgi.application'
 
 
 # Database
@@ -120,7 +120,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
 
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -138,4 +137,4 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/.*$'
 
 
-AUTH_USER_MODEL = 'backend_bot_app.User'
+AUTH_USER_MODEL = 'api_app.User'

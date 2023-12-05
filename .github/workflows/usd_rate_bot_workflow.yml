@@ -1,0 +1,110 @@
+name: UsdRateBot workflow
+
+on: [push]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8
+
+    - name: Lint with flake8
+      run: flake8 . --exclude venv,backend/backend_project/backend_project/settings.py,backend/backend_project/api_app/migrations
+
+
+  build_and_push_to_docker_hub:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Docker
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Push to Docker Hub Backend
+        uses: docker/build-push-action@v2
+        with:
+          context: backend
+          push: true
+          tags: russel07/usd_rate_bot_backend:latest
+      - name: Push to Docker Hub TelegramBot
+        uses: docker/build-push-action@v2
+        with:
+          context: telegram_bot
+          push: true
+          tags: russel07/usd_rate_bot_telegram:latest
+
+
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build_and_push_to_docker_hub
+  #   steps:
+  #   - name: Set environment variables
+  #     uses: appleboy/ssh-action@master
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.USER }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.PASSPHRASE }}
+  #       script: |
+  #         cd foodgram
+  #         FILE=.env
+  #         if [ -f "$FILE" ]
+  #         then
+  #           echo "$FILE exists and will removed"
+  #           rm $FILE
+  #         else
+  #           echo "$FILE does not exist"
+  #         fi
+  #         echo "Add new $FILE"
+  #         touch $FILE
+  #         echo SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> $FILE
+  #         echo ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> $FILE
+  #         echo CSRF_TRUSTED_ORIGINS=${{ secrets.DJANGO_CSRF_TRUSTED_ORIGINS }} >> $FILE
+  #         echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> $FILE
+  #         echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+  #         echo DB_HOST=${{ secrets.DB_HOST }} >> $FILE
+  #         echo DB_PORT=${{ secrets.DB_PORT }} >> $FILE
+  #         echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> $FILE
+  #         echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> $FILE
+  #         echo EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }} >> $FILE
+  #         echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> $FILE
+
+  #   - name: executing remote ssh commands to deploy
+  #     uses: appleboy/ssh-action@master
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.USER }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.PASSPHRASE }}
+  #       script: |
+  #         cd foodgram
+  #         sudo docker pull russel07/foodgram:latest
+  #         sudo docker-compose stop
+  #         sudo docker-compose rm web
+  #         sudo docker-compose up -d
+
+  # send_message:
+  #   runs-on: ubuntu-latest
+  #   needs: deploy
+  #   steps:
+  #   - name: send message
+  #     uses: appleboy/telegram-action@master
+  #     with:
+  #       to: ${{ secrets.TELEGRAM_TO }}
+  #       token: ${{ secrets.TELEGRAM_TOKEN }}
+  #       message: ${{ github.workflow }} успешно выполнен!
