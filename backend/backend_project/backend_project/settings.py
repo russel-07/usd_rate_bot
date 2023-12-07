@@ -7,7 +7,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / '.env')
+environ.Env.read_env(BASE_DIR / '../../.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -75,8 +75,8 @@ DATABASES = {
     'default': {
         'ENGINE': env('DB_ENGINE'),
         'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
+        'USER': env('POSTGRES_USER'),
+        'PASSWORD': env('POSTGRES_PASSWORD'),
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT'),
     }

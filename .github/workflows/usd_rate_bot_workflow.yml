@@ -53,37 +53,6 @@ jobs:
   #   runs-on: ubuntu-latest
   #   needs: build_and_push_to_docker_hub
   #   steps:
-  #   - name: Set environment variables
-  #     uses: appleboy/ssh-action@master
-  #     with:
-  #       host: ${{ secrets.HOST }}
-  #       username: ${{ secrets.USER }}
-  #       key: ${{ secrets.SSH_KEY }}
-  #       passphrase: ${{ secrets.PASSPHRASE }}
-  #       script: |
-  #         cd foodgram
-  #         FILE=.env
-  #         if [ -f "$FILE" ]
-  #         then
-  #           echo "$FILE exists and will removed"
-  #           rm $FILE
-  #         else
-  #           echo "$FILE does not exist"
-  #         fi
-  #         echo "Add new $FILE"
-  #         touch $FILE
-  #         echo SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> $FILE
-  #         echo ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> $FILE
-  #         echo CSRF_TRUSTED_ORIGINS=${{ secrets.DJANGO_CSRF_TRUSTED_ORIGINS }} >> $FILE
-  #         echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> $FILE
-  #         echo DB_NAME=${{ secrets.DB_NAME }} >> .env
-  #         echo DB_HOST=${{ secrets.DB_HOST }} >> $FILE
-  #         echo DB_PORT=${{ secrets.DB_PORT }} >> $FILE
-  #         echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> $FILE
-  #         echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> $FILE
-  #         echo EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }} >> $FILE
-  #         echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> $FILE
-
   #   - name: executing remote ssh commands to deploy
   #     uses: appleboy/ssh-action@master
   #     with:
@@ -92,11 +61,14 @@ jobs:
   #       key: ${{ secrets.SSH_KEY }}
   #       passphrase: ${{ secrets.PASSPHRASE }}
   #       script: |
-  #         cd foodgram
-  #         sudo docker pull russel07/foodgram:latest
+  #         cd usd_rate_bot
+  #         sudo docker pull russel07/usd_rate_bot_backend:latest
+  #         sudo docker pull russel07/usd_rate_bot_telegram:latest
   #         sudo docker-compose stop
   #         sudo docker-compose rm web
+  #         sudo docker-compose rm telegram
   #         sudo docker-compose up -d
+
 
   send_message:
     runs-on: ubuntu-latest

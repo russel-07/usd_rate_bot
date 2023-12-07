@@ -71,9 +71,9 @@ async def notification():
         await bot.send_message(chat_id, msg, parse_mode='HTML')
 
 
-scheduler.add_job(update_usd_rate, 'cron', day_of_week='mon-sat',
+scheduler.add_job(update_usd_rate, 'cron', day_of_week='mon-fri',
                   hour=9, minute=58)
-scheduler.add_job(notification, 'cron', day_of_week='mon-sat',
+scheduler.add_job(notification, 'cron', day_of_week='mon-fri',
                   hour=10, minute=0)
 scheduler.start()
 
