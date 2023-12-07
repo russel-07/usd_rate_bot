@@ -22,7 +22,7 @@ def signup(chat_id, firstname, lastname, username):
         text = get_template_text('greeting', token)
         msg = text.format(**data)
     else:
-        msg = 'Вы уже зарегистрированы. Проверка!'
+        msg = 'Вы уже зарегистрированы.'
     return msg
 
 
@@ -33,8 +33,8 @@ def get_user_data(chat_id):
     if response.status_code == 200:
         data = response.json()
         dt_frmt = '%Y-%m-%dT%H:%M:%S.%f+03:00'
-        data['notification'] = 'включены проверка' if data['notification'] \
-            else 'выключены проверка'
+        data['notification'] = 'включены' if data['notification'] \
+            else 'выключены'
         data['reg_date'] = dt.strptime(data['reg_date'], dt_frmt) \
             .strftime('%d.%m.%Y')
         text = get_template_text('user_data', token)
@@ -53,7 +53,7 @@ def change_user_notification_status(chat_id):
         if response.status_code == 200:
             if user_notification_status:
                 msg = 'Вы успешно подписались на периодическое' \
-                      ' оповещение о курсе доллара. Проверка!'
+                      ' оповещение о курсе доллара.'
             else:
                 msg = 'Вы успешно отписались от периодического' \
                       ' оповещения о курсе доллара.'
