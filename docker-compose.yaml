@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:13.1
-    container_name: postgres
+    container_name: usd_rate_bot_postgres
     env_file:
       - ./.env
     ports:
@@ -12,9 +12,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
-  web:
+  backend:
     image: russel07/usd_rate_bot_backend:latest
-    container_name: web
+    container_name: usd_rate_bot_backend
     env_file:
       - ./.env
     restart: always
@@ -25,18 +25,18 @@ services:
 
   nginx:
     image: nginx:1.19.6
-    container_name: nginx
+    container_name: usd_rate_bot_nginx
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - staticfiles:/code/backend_project/static
     ports:
       - 80:80
     depends_on:
-      - web
+      - backend
 
   telegram:
     image: russel07/usd_rate_bot_telegram:latest
-    container_name: telegram
+    container_name: usd_rate_bot_telegram
     env_file:
       - ./.env
     restart: always
